@@ -56,14 +56,17 @@ bondar@bondar:~$ ip a s
 - `ip route show default` --> пусто (у системы нет Default Gateway)
 
 Если ставили систему с xfce(KDE наверное так же) то рулит сетью у нас `NetworkManager`  
-`sudo systemctl status NetworkManager.service` -> чтобы убедиться
 
-Для взаимодействия пользуемся nmcli
+```sh
+sudo systemctl status NetworkManager.service
+```
+
+Для взаимодействия пользуемся `nmcli`
 
 ```sh
 nmcli con show -->  показать соединения о которых NetworkManager знает
-nmcli dev status
-nmcli
+nmcli dev status --> состояния устройств
+nmcli --> общие данные
 nmcli dev show enp0s3 --> подробная информация про enp0s3
 nmcli con show "Wired connection 1" --> подробная информация о соединении
 ```
@@ -80,9 +83,7 @@ Wired connection 1  07774190-c6f1-4861-a1fa-82417503add7  ethernet  --
 ```sh
 bondar@bondar:~$ nmcli con up id "Wired connection 1" ifname enp0s3
 Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/23)
-```
 
-```sh
 bondar@bondar:~$ ip route show default
 default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100 
 ```
@@ -113,8 +114,14 @@ enp0s8  ethernet  connecting (getting IP configuration)  Wired connection 2
 
 Wired connection 2 -- пытается получить адрес от DHCP сервера, но мы установили `enp0s8` как Internal Network в VirtualBox -> DHCP сервер отсутствует
 
-`ip route show default` -> покажет default gateway который используется  
-**Default Gateway** -- Router на который наш пк отправляет все network пакеты с итоговым адресом назначения вне нашей локальной сети
+## Default gateway
+
+**Default Gateway** - Router на который наш пк отправляет все network пакеты с итоговым адресом назначения вне нашей локальной сети
+
+```sh
+bondar@bondar:~$ ip route show default
+default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100 
+```
 
 - в случае виртуальной машины - это VirtualBox NAT "Router" с ip = 10.0.2.2
 - в реальной жизни - скорее всего домашний wifi роутер
