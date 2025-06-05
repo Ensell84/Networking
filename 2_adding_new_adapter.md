@@ -9,25 +9,25 @@
 ```sh
 bondar@bondar:~$ ip a s
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-    inet6 ::1/128 scope host noprefixroute 
-       valid_lft forever preferred_lft forever
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet 127.0.0.1/8 scope host lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope host noprefixroute 
+      valid_lft forever preferred_lft forever
 2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 08:00:27:0c:03:e1 brd ff:ff:ff:ff:ff:ff
-    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
-       valid_lft 86354sec preferred_lft 86354sec
-    inet6 fd00::cc74:9f9:1e38:749c/64 scope global temporary dynamic 
-       valid_lft 86357sec preferred_lft 14357sec
-    inet6 fd00::a00:27ff:fe0c:3e1/64 scope global dynamic mngtmpaddr noprefixroute 
-       valid_lft 86357sec preferred_lft 14357sec
-    inet6 fe80::a00:27ff:fe0c:3e1/64 scope link noprefixroute 
-       valid_lft forever preferred_lft forever
+   link/ether 08:00:27:0c:03:e1 brd ff:ff:ff:ff:ff:ff
+   inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+      valid_lft 86354sec preferred_lft 86354sec
+   inet6 fd00::cc74:9f9:1e38:749c/64 scope global temporary dynamic 
+      valid_lft 86357sec preferred_lft 14357sec
+   inet6 fd00::a00:27ff:fe0c:3e1/64 scope global dynamic mngtmpaddr noprefixroute 
+      valid_lft 86357sec preferred_lft 14357sec
+   inet6 fe80::a00:27ff:fe0c:3e1/64 scope link noprefixroute 
+      valid_lft forever preferred_lft forever
 3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 08:00:27:ec:53:0f brd ff:ff:ff:ff:ff:ff
-    inet6 fe80::8878:9ce8:cde7:2d19/64 scope link tentative noprefixroute 
-       valid_lft forever preferred_lft forever
+   link/ether 08:00:27:ec:53:0f brd ff:ff:ff:ff:ff:ff
+   inet6 fe80::8878:9ce8:cde7:2d19/64 scope link tentative noprefixroute 
+      valid_lft forever preferred_lft forever
 ```
 
 `1: lo:` Loopback адаптер - виртуальный интерфейс для общения системы с собой же
@@ -109,7 +109,8 @@ default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100
 
 ### Решение проблемы с NetworkManager
 
-> [!IMPORTANT] Явно зададим что "Wired connection 1" -- должен подключатся через enp0s3
+> [!IMPORTANT]
+> Явно зададим что "Wired connection 1" -- должен подключатся через enp0s3
 
 ```sh
 sudo nmcli con modify "Wired connection 1" connection.interface-name enp0s3
@@ -140,7 +141,7 @@ enp0s8  ethernet  connecting (getting IP configuration)  Wired connection 2
 **Default Gateway** - Router на который наш пк отправляет все network пакеты с итоговым адресом назначения вне нашей локальной сети
 
 ```sh
-bondar@bondar:~$ ip route show default
+shrek@deb:~$ ip route show default
 default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100 
 ```
 
@@ -149,3 +150,70 @@ default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100
 - Зачастую назначается DHCP сервером
 
 ## Что такое device? connection? interface?
+
+### Device
+
+**Device** - физическое или виртуальное сетевое устройство, например, Ethernet-адаптер или Wi-Fi-адаптер.
+
+- MAC адрес устройства - уникальный идентификатор, который используется для адресации на канальном уровне. `link/ether 08:00:27:0c:03:e1`
+- physical state  (`UP`/`DOWN`)
+
+```sh
+nmcli dev
+DEVICE  TYPE      STATE                                  CONNECTION         
+enp0s3  ethernet  connected                              Wired connection 1 
+lo      loopback  connected (externally)                 lo                 
+enp0s8  ethernet  connecting (getting IP configuration)  Wired connection 2 
+
+
+ip link show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+   link/ether 08:00:27:08:ab:ee brd ff:ff:ff:ff:ff:ff
+3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+   link/ether 08:00:27:d5:7e:68 brd ff:ff:ff:ff:ff:ff
+
+```
+
+### Interface
+
+**Interface** - Представление сетевого устройства в ядре операционной системы, которое позволяет взаимодействовать с ним.
+
+Например, интерфейс может быть связан с конкретным устройством (device) и иметь свои настройки, такие как IP-адрес, маска подсети и т.д.
+
+В контексте Linux - синоним для device, но в других системах может отличаться.
+
+В модели OSI - это Layer 2 (Data Link Layer) и Layer 3 (Network Layer) - то есть интерфейс может работать на канальном уровне и сетевом уровне.
+
+```sh
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP>...
+  inet 10.0.2.15/24 brd 10.0.2.255
+```
+
+### Connection
+
+**Connection** - профиль подключения, который содержит настройки для сетевого интерфейса. Абстракция созданная чисто NetworkManager для управления сетевыми соединениями.
+
+Хранятся в `/etc/NetworkManager/system-connections/` и могут быть созданы вручную или автоматически при подключении к сети.
+
+| Concept | Scope | Persistence | Configurable | Example |
+|---------|--------|-------------|--------------|---------|
+| Device | Hardware level | Ephemeral | No | enp0s8 physical port |
+| Interface | Kernel level | While active | Partially | enp0s8 with IP config |
+| Connection | Software | Permanent | Yes | "Wired connection 2" settings |
+
+Пример конфигурации:
+
+```sh
+nmcli con add type ethernet ifname enp0s3 name "Office-LAN"
+nmcli con modify "Office-LAN" ipv4.addresses 192.168.1.10/24
+```
+
+Когда мы делали:
+
+```sh
+sudo nmcli con modify "Wired connection 1" connection.interface-name enp0s3
+```
+
+Мы привязали профиль подключения к конкретному интерфейсу, устранив конфликт, при котором NetworkManager пытался применить неправильный профиль к интерфейсу enp0s3.
